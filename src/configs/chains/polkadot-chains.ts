@@ -27,9 +27,16 @@ export const polkadotChains = {
     paraChainId: 2012,
     ss58Prefix: 172,
   },
+  manta: {
+    display: "Manta Network",
+    type: "substrate",
+    icon: "https://resources.acala.network/_next/image?url=%2Fnetworks%manta.png&w=96&q=75",
+    paraChainId: 2104,
+    ss58Prefix: 77,
+  },
   moonbeam: {
     display: "Moonbeam",
-    type: "substrate",
+    type: "ethereum",
     icon: "https://resources.acala.network/_next/image?url=%2Fnetworks%2Fmoonbeam.png&w=96&q=75",
     paraChainId: 2004,
     ss58Prefix: 1284,
