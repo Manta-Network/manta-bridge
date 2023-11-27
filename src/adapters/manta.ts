@@ -37,7 +37,55 @@ export const mantaRouteConfigs = createRouteConfigs("manta", [
     to: "moonbeam",
     token: "GLMR",
     xcm: {
-      fee: { token: "GLMR", amount: "5444794429171897" },
+      fee: { token: "GLMR", amount: "3431370000000000" },
+      weightLimit: DEST_WEIGHT,
+    },
+  },
+  {
+    to: "moonbeam",
+    token: "MANTA",
+    xcm: {
+      fee: { token: "MANTA", amount: "0" },
+      weightLimit: DEST_WEIGHT,
+    },
+  },
+  {
+    to: "moonbeam",
+    token: "DAI",
+    xcm: {
+      fee: { token: "DAI", amount: "0" },
+      weightLimit: DEST_WEIGHT,
+    },
+  },
+  {
+    to: "moonbeam",
+    token: "USDC",
+    xcm: {
+      fee: { token: "USDC", amount: "0" },
+      weightLimit: DEST_WEIGHT,
+    },
+  },
+  {
+    to: "moonbeam",
+    token: "WETH",
+    xcm: {
+      fee: { token: "WETH", amount: "0" },
+      weightLimit: DEST_WEIGHT,
+    },
+  },
+  {
+    to: "moonbeam",
+    token: "WBNB",
+    xcm: {
+      fee: { token: "WBNB", amount: "0" },
+      weightLimit: DEST_WEIGHT,
+    },
+  },
+  {
+    to: "moonbeam",
+    token: "tBTC",
+    xcm: {
+      fee: { token: "tBTC", amount: "0" },
       weightLimit: DEST_WEIGHT,
     },
   },
@@ -52,25 +100,60 @@ export const mantaTokensConfig: Record<string, ExtendedToken> = {
     toRaw: () => ({ MantaCurrency: 1 }),
   },
   DOT: {
-    name: "DOT",
+    name: "Polkadot",
     symbol: "DOT",
     decimals: 10,
     ed: "10000000000",
     toRaw: () => ({ MantaCurrency: 8 }),
   },
   ACA: {
-    name: "ACA",
+    name: "Acala",
     symbol: "ACA",
     decimals: 12,
     ed: "100000000000",
     toRaw: () => ({ MantaCurrency: 11 }),
   },
   GLMR: {
-    name: "GLMR",
+    name: "Moonbeam",
     symbol: "GLMR",
     decimals: 18,
-    ed: "100000000000000000",
+    ed: "2000000000000000",
     toRaw: () => ({ MantaCurrency: 10 }),
+  },
+  DAI: {
+    name: "DAI Stablecoin (MRL)",
+    symbol: "DAI.MRL.ETH",
+    decimals: 18,
+    ed: "10000000000000000",
+    toRaw: () => ({ MantaCurrency: 31 }),
+  },
+  WETH: {
+    name: "Wrapped Ether (MRL)",
+    symbol: "WETH.MRL.ETH",
+    decimals: 18,
+    ed: "5555555555555",
+    toRaw: () => ({ MantaCurrency: 32 }),
+  },
+  USDC: {
+    name: "USD Coin (MRL)",
+    symbol: "USDC.MRL.ETH",
+    decimals: 6,
+    ed: "10000",
+    toRaw: () => ({ MantaCurrency: 33 }),
+  },
+  tBTC: {
+    name: "tBTC v2 (MRL)",
+    symbol: "TBTC.MRL.ETH",
+    decimals: 18,
+    ed: "1",
+    toRaw: () => ({ MantaCurrency: 34 }),
+  },
+  WBNB: {
+    name: "Wrapped BNB (MRL)",
+    symbol: "WBNB.MRL.BSC",
+    decimals: 18,
+    ed: "40000000000000",
+    toRaw: () => ({ MantaCurrency: 35 }),
   },
 };
 
@@ -117,9 +200,9 @@ export const calamariRouteConfigs = createRouteConfigs("calamari", [
   },
   {
     to: "karura",
-    token: "USDCet",
+    token: "USDC",
     xcm: {
-      fee: { token: "USDCet", amount: "808" },
+      fee: { token: "USDC", amount: "808" },
       weightLimit: DEST_WEIGHT,
     },
   },
@@ -207,9 +290,9 @@ export const calamariTokensConfig: Record<string, ExtendedToken> = {
     ed: "10000000000000000",
     toRaw: () => ({ MantaCurrency: 15 }),
   },
-  USDCet: {
-    name: "USDCet",
-    symbol: "USDCet",
+  USDC: {
+    name: "USDC",
+    symbol: "USDC",
     decimals: 6,
     ed: "10000",
     toRaw: () => ({ MantaCurrency: 16 }),
@@ -338,7 +421,7 @@ class BaseMantaAdapter extends BaseCrossChainAdapter {
               amount: FN.ZERO,
               to,
               token,
-              address,
+              address: "0x000000000000000000000000000000000000dead",
               signer: address,
             })
           : "0",
@@ -393,7 +476,7 @@ class BaseMantaAdapter extends BaseCrossChainAdapter {
           V1: dst,
         },
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        { Limited: this.getDestWeight(token, to)!.toString() }
+        { Limited: DEST_WEIGHT }
       );
     }
     return this.createXTokensTx(params);

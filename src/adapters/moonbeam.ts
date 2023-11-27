@@ -14,12 +14,60 @@ import { DeriveBalancesAll } from "@polkadot/api-derive/balances/types";
 import { BalanceAdapter, BalanceAdapterConfigs } from "../balance-adapter";
 import { BN } from "@polkadot/util";
 
-export const moonbeamRoutersConfig = createRouteConfigs("moonriver", [
+export const moonbeamRoutersConfig = createRouteConfigs("moonbeam", [
   {
     to: "manta",
     token: "GLMR",
     xcm: {
-      fee: { token: "GLMR", amount: "921009000000000000" },
+      fee: { token: "GLMR", amount: "79005010863196000" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "manta",
+    token: "MANTA",
+    xcm: {
+      fee: { token: "MANTA", amount: "0" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "manta",
+    token: "DAI",
+    xcm: {
+      fee: { token: "DAI", amount: "25226300000000000" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "manta",
+    token: "WETH",
+    xcm: {
+      fee: { token: "WETH", amount: "13774476078148" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "manta",
+    token: "USDC",
+    xcm: {
+      fee: { token: "USDC", amount: "25226" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "manta",
+    token: "tBTC",
+    xcm: {
+      fee: { token: "tBTC", amount: "874343628633" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "manta",
+    token: "WBNB",
+    xcm: {
+      fee: { token: "WBNB", amount: "104378932143640" },
       weightLimit: "Unlimited",
     },
   },
@@ -43,6 +91,42 @@ export const moonbeamTokensConfig: Record<string, BasicToken> = {
     decimals: 18,
     ed: "100000000000000000",
   },
+  MANTA: {
+    name: "MANTA",
+    symbol: "xcMANTA",
+    decimals: 18,
+    ed: "0",
+  },
+  DAI: {
+    name: "DAI",
+    symbol: "DAI",
+    decimals: 18,
+    ed: "0",
+  },
+  USDC: {
+    name: "USDC",
+    symbol: "USDC",
+    decimals: 6,
+    ed: "0",
+  },
+  tBTC: {
+    name: "tBTC",
+    symbol: "tBTC",
+    decimals: 18,
+    ed: "0",
+  },
+  WETH: {
+    name: "WETH",
+    symbol: "WETH",
+    decimals: 18,
+    ed: "0",
+  },
+  WBNB: {
+    name: "WBNB",
+    symbol: "WBNB",
+    decimals: 18,
+    ed: "0",
+  },
   ACA: { name: "ACA", symbol: "ACA", decimals: 12, ed: "100000000000" },
   AUSD: { name: "AUSD", symbol: "AUSD", decimals: 12, ed: "100000000000" },
   LDOT: { name: "LDOT", symbol: "LDOT", decimals: 10, ed: "500000000" },
@@ -56,8 +140,10 @@ export const moonriverTokensConfig: Record<string, BasicToken> = {
 };
 
 const SUPPORTED_TOKENS: Record<string, string> = {
+  MANTA: "MANTA",
   MOVR: "MOVR",
   GLMR: "GLMR",
+  DAI: "DAI",
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -116,7 +202,7 @@ class MoonbeamBalanceAdapter extends BalanceAdapter {
       throw new TokenNotFound(token);
     }
 
-    return this.storages.assets(address, tokenId).observable.pipe(
+    return this.storages.assets(tokenId, address).observable.pipe(
       map((balance) => {
         const amount = FN.fromInner(
           balance.free?.toString() || "0",
