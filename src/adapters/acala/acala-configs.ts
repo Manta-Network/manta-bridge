@@ -60,13 +60,6 @@ export const acalaRouteConfigs = createRouteConfigs("acala", [
   },
   {
     to: "parallel",
-    token: "AUSD",
-    xcm: {
-      fee: { token: "AUSD", amount: "2880000000" },
-    },
-  },
-  {
-    to: "parallel",
     token: "LDOT",
     xcm: {
       fee: { token: "LDOT", amount: "96000000" },
@@ -104,7 +97,7 @@ export const acalaRouteConfigs = createRouteConfigs("acala", [
     to: "interlay",
     token: "INTR",
     xcm: {
-      fee: { token: "INTR", amount: "21787589" },
+      fee: { token: "INTR", amount: "19000000" },
     },
   },
   {
