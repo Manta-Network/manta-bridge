@@ -200,9 +200,9 @@ export const calamariRouteConfigs = createRouteConfigs('calamari', [
 	},
 	{
 		to: 'karura',
-		token: 'USDC',
+		token: 'USDCet',
 		xcm: {
-			fee: { token: 'USDC', amount: '808' },
+			fee: { token: 'USDCet', amount: '808' },
 			weightLimit: DEST_WEIGHT,
 		},
 	},
@@ -290,7 +290,7 @@ export const calamariTokensConfig: Record<string, ExtendedToken> = {
 		ed: '10000000000000000',
 		toRaw: () => ({ MantaCurrency: 15 }),
 	},
-	USDC: {
+	USDCet: {
 		name: 'USDC',
 		symbol: 'USDC',
 		decimals: 6,
@@ -464,8 +464,7 @@ class BaseMantaAdapter extends BaseCrossChainAdapter {
 				parents: 1,
 				interior: {
 					X2: [
-						// { Parachain: toChain.paraChainId },
-						{ Parachain: 1000 }, // moonbase testnet, need to use toChain.paraChainId in prod
+						{ Parachain: toChain.paraChainId },
 						{ AccountKey20: { key: address } },
 					],
 				},
@@ -474,6 +473,7 @@ class BaseMantaAdapter extends BaseCrossChainAdapter {
 				tokenData.toRaw(),
 				amount.toChainData(),
 				{
+					// @ts-ignore
 					V3: dst,
 				},
 				'Unlimited'
