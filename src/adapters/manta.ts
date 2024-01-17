@@ -45,7 +45,7 @@ export const mantaRouteConfigs = createRouteConfigs('manta', [
 		to: 'moonbeam',
 		token: 'MANTA',
 		xcm: {
-			fee: { token: 'MANTA', amount: '0' },
+			fee: { token: 'MANTA', amount: '100000000000000000' },
 			weightLimit: DEST_WEIGHT,
 		},
 	},
