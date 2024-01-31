@@ -72,6 +72,7 @@ export interface NetworkProps {
 }
 
 export interface TransferParams {
+  signer: string;
   address: string;
   amount: FixedPointNumber;
   to: ChainId;

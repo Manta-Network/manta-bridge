@@ -1,13 +1,88 @@
 import { AnyApi, FixedPointNumber as FN } from "@acala-network/sdk-core";
-import { Observable } from "rxjs";
+import { combineLatest, from, map, Observable } from "rxjs";
 
 import { SubmittableExtrinsic } from "@polkadot/api/types";
 import { ISubmittableResult } from "@polkadot/types/types";
 
 import { BaseCrossChainAdapter } from "../base-chain-adapter";
 import { ChainId, chains } from "../configs";
-import { ApiNotFound } from "../errors";
+import { ApiNotFound, TokenNotFound } from "../errors";
 import { BalanceData, BasicToken, TransferParams } from "../types";
+import { createRouteConfigs } from "../utils";
+import { Storage } from "@acala-network/sdk/utils/storage";
+import { DeriveBalancesAll } from "@polkadot/api-derive/balances/types";
+import { BalanceAdapter, BalanceAdapterConfigs } from "../balance-adapter";
+import { BN } from "@polkadot/util";
+
+export const moonbeamRoutersConfig = createRouteConfigs("moonbeam", [
+  {
+    to: "manta",
+    token: "GLMR",
+    xcm: {
+      fee: { token: "GLMR", amount: "79005010863196000" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "manta",
+    token: "MANTA",
+    xcm: {
+      fee: { token: "MANTA", amount: "0" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "manta",
+    token: "DAI",
+    xcm: {
+      fee: { token: "DAI", amount: "25226300000000000" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "manta",
+    token: "WETH",
+    xcm: {
+      fee: { token: "WETH", amount: "13774476078148" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "manta",
+    token: "USDC",
+    xcm: {
+      fee: { token: "USDC", amount: "25226" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "manta",
+    token: "tBTC",
+    xcm: {
+      fee: { token: "tBTC", amount: "874343628633" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "manta",
+    token: "WBNB",
+    xcm: {
+      fee: { token: "WBNB", amount: "104378932143640" },
+      weightLimit: "Unlimited",
+    },
+  },
+]);
+
+export const moonriverRoutersConfig = createRouteConfigs("moonriver", [
+  {
+    to: "calamari",
+    token: "MOVR",
+    xcm: {
+      fee: { token: "MOVR", amount: "503025000000000" },
+      weightLimit: "Unlimited",
+    },
+  },
+]);
 
 export const moonbeamTokensConfig: Record<string, BasicToken> = {
   GLMR: {
@@ -15,6 +90,42 @@ export const moonbeamTokensConfig: Record<string, BasicToken> = {
     symbol: "GLMR",
     decimals: 18,
     ed: "100000000000000000",
+  },
+  MANTA: {
+    name: "MANTA",
+    symbol: "xcMANTA",
+    decimals: 18,
+    ed: "0",
+  },
+  DAI: {
+    name: "DAI",
+    symbol: "DAI",
+    decimals: 18,
+    ed: "0",
+  },
+  USDC: {
+    name: "USDC",
+    symbol: "USDC",
+    decimals: 6,
+    ed: "0",
+  },
+  tBTC: {
+    name: "tBTC",
+    symbol: "tBTC",
+    decimals: 18,
+    ed: "0",
+  },
+  WETH: {
+    name: "WETH",
+    symbol: "WETH",
+    decimals: 18,
+    ed: "0",
+  },
+  WBNB: {
+    name: "WBNB",
+    symbol: "WBNB",
+    decimals: 18,
+    ed: "0",
   },
   ACA: { name: "ACA", symbol: "ACA", decimals: 12, ed: "100000000000" },
   AUSD: { name: "AUSD", symbol: "AUSD", decimals: 12, ed: "100000000000" },
@@ -28,21 +139,163 @@ export const moonriverTokensConfig: Record<string, BasicToken> = {
   KUSD: { name: "KUSD", symbol: "KUSD", decimals: 12, ed: "0" },
 };
 
-class BaseMoonbeamAdapter extends BaseCrossChainAdapter {
-  public subscribeTokenBalance(_: string, __: string): Observable<BalanceData> {
-    throw new ApiNotFound(this.chain.id);
+const SUPPORTED_TOKENS: Record<string, string> = {
+  MANTA: "MANTA",
+  MOVR: "MOVR",
+  GLMR: "GLMR",
+  DAI: "DAI",
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+const createBalanceStorages = (api: AnyApi) => {
+  return {
+    balances: (address: string) =>
+      Storage.create<DeriveBalancesAll>({
+        api,
+        path: "derive.balances.all",
+        params: [address],
+      }),
+    assets: (tokenId: string, address: string) =>
+      Storage.create<any>({
+        api,
+        path: "query.assets.account",
+        params: [tokenId, address],
+      }),
+  };
+};
+
+class MoonbeamBalanceAdapter extends BalanceAdapter {
+  private storages: ReturnType<typeof createBalanceStorages>;
+
+  constructor({ api, chain, tokens }: BalanceAdapterConfigs) {
+    super({ api, chain, tokens });
+    this.storages = createBalanceStorages(api);
   }
+
+  public subscribeBalance(
+    token: string,
+    address: string
+  ): Observable<BalanceData> {
+    const storage = this.storages.balances(address);
+
+    if (token === this.nativeToken) {
+      return storage.observable.pipe(
+        map((data) => ({
+          free: FN.fromInner(data.freeBalance.toString(), this.decimals),
+          locked: FN.fromInner(data.lockedBalance.toString(), this.decimals),
+          reserved: FN.fromInner(
+            data.reservedBalance.toString(),
+            this.decimals
+          ),
+          available: FN.fromInner(
+            data.availableBalance.toString(),
+            this.decimals
+          ),
+        }))
+      );
+    }
+
+    const tokenId = SUPPORTED_TOKENS[token];
+    console.log("moonbeam token", token);
+
+    if (tokenId === undefined) {
+      throw new TokenNotFound(token);
+    }
+
+    return this.storages.assets(tokenId, address).observable.pipe(
+      map((balance) => {
+        const amount = FN.fromInner(
+          balance.free?.toString() || "0",
+          this.getToken(tokenId).decimals
+        );
+
+        return {
+          free: amount,
+          locked: new FN(0),
+          reserved: new FN(0),
+          available: amount,
+        };
+      })
+    );
+  }
+}
+
+class BaseMoonbeamAdapter extends BaseCrossChainAdapter {
+  private balanceAdapter?: MoonbeamBalanceAdapter;
 
   public async init(api: AnyApi) {
     this.api = api;
+
+    await api.isReady;
+
+    this.balanceAdapter = new MoonbeamBalanceAdapter({
+      chain: this.chain.id as ChainId,
+      api,
+      tokens: this.tokens,
+    });
+  }
+
+  public subscribeTokenBalance(
+    token: string,
+    address: string
+  ): Observable<BalanceData> {
+    if (!this.balanceAdapter) {
+      throw new ApiNotFound(this.chain.id);
+    }
+
+    return this.balanceAdapter.subscribeBalance(token, address);
   }
 
   public subscribeMaxInput(
-    _: string,
-    __: string,
-    ___: ChainId
+    token: string,
+    address: string,
+    to: ChainId
   ): Observable<FN> {
-    throw new ApiNotFound(this.chain.id);
+    if (!this.balanceAdapter) {
+      throw new ApiNotFound(this.chain.id);
+    }
+
+    return combineLatest({
+      txFee:
+        token === this.balanceAdapter?.nativeToken
+          ? this.estimateTxFee({
+              amount: FN.ZERO,
+              to,
+              token,
+              address,
+              signer: address,
+            })
+          : "0",
+      balance: this.balanceAdapter
+        .subscribeBalance(token, address)
+        .pipe(map((i) => i.available)),
+    }).pipe(
+      map(({ balance, txFee }) => {
+        const tokenMeta = this.balanceAdapter?.getToken(token);
+        const feeFactor = 1.2;
+        const fee = FN.fromInner(txFee, tokenMeta?.decimals).mul(
+          new FN(feeFactor)
+        );
+
+        // always minus ed
+        return balance
+          .minus(fee)
+          .minus(FN.fromInner(tokenMeta?.ed || "0", tokenMeta?.decimals));
+      })
+    );
+  }
+
+  public override estimateTxFee(_: TransferParams): Observable<string> {
+    const MOONBEAM_XCM_GAS = new BN(35697);
+    return from(
+      (async () => {
+        const baseFee: any = await this.api?.rpc.eth.gasPrice();
+        const minFee = baseFee.mul(MOONBEAM_XCM_GAS);
+        // Metamask default fee is minFee * 1.5
+        const mediumFee = minFee.mul(new BN(3)).div(new BN(2));
+        return mediumFee.toString();
+      })()
+    );
   }
 
   public createTx(
@@ -56,12 +309,12 @@ class BaseMoonbeamAdapter extends BaseCrossChainAdapter {
 
 export class MoonbeamAdapter extends BaseMoonbeamAdapter {
   constructor() {
-    super(chains.moonbeam, [], moonbeamTokensConfig);
+    super(chains.moonbeam, moonbeamRoutersConfig, moonbeamTokensConfig);
   }
 }
 
 export class MoonriverAdapter extends BaseMoonbeamAdapter {
   constructor() {
-    super(chains.moonriver, [], moonriverTokensConfig);
+    super(chains.moonriver, moonriverRoutersConfig, moonriverTokensConfig);
   }
 }

@@ -213,6 +213,27 @@ export const karuraRouteConfigs = createRouteConfigs("karura", [
     },
   },
   {
+    to: "calamari",
+    token: "DAI",
+    xcm: {
+      fee: { token: "DAI", amount: "25159325000000000" },
+    },
+  },
+  {
+    to: "calamari",
+    token: "USDCet",
+    xcm: {
+      fee: { token: "USDCet", amount: "25159" },
+    },
+  },
+  {
+    to: "calamari",
+    token: "USDT",
+    xcm: {
+      fee: { token: "USDT", amount: "25163" },
+    },
+  },
+  {
     to: "moonriver",
     token: "MOVR",
     xcm: {

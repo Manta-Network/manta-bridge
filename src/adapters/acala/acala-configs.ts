@@ -10,6 +10,13 @@ export const acalaRouteConfigs = createRouteConfigs("acala", [
     },
   },
   {
+    to: "manta",
+    token: "ACA",
+    xcm: {
+      fee: { token: "ACA", amount: "520927169421" },
+    },
+  },
+  {
     to: "moonbeam",
     token: "GLMR",
     xcm: {

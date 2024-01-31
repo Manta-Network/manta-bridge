@@ -20,6 +20,14 @@ export const polkadotRouteConfigs = createRouteConfigs("polkadot", [
     xcm: { fee: { token: "DOT", amount: "3549633" }, weightLimit: "Unlimited" },
   },
   {
+    to: "manta",
+    token: "DOT",
+    xcm: {
+      fee: { token: "DOT", amount: "46262155" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
     to: "hydradx",
     token: "DOT",
     xcm: {
@@ -59,6 +67,14 @@ export const kusamaRouteConfigs = createRouteConfigs("kusama", [
     token: "KSM",
     xcm: {
       fee: { token: "KSM", amount: "34368318" },
+      weightLimit: "Unlimited",
+    },
+  },
+  {
+    to: "calamari",
+    token: "KSM",
+    xcm: {
+      fee: { token: "KSM", amount: "167728833" },
       weightLimit: "Unlimited",
     },
   },
