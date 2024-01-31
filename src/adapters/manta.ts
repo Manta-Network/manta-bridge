@@ -89,9 +89,24 @@ export const mantaRouteConfigs = createRouteConfigs('manta', [
 			weightLimit: DEST_WEIGHT,
 		},
 	},
+	{
+		to: 'statemint',
+		token: 'USDT',
+		xcm: {
+			fee: { token: 'USDT', amount: '700000' },
+			weightLimit: DEST_WEIGHT,
+		},
+	},
 ]);
 
 export const mantaTokensConfig: Record<string, ExtendedToken> = {
+	USDT: {
+		name: 'Tether USD',
+		symbol: 'USDT',
+		decimals: 6,
+		ed: '1000',
+		toRaw: () => ({ MantaCurrency: 9 }),
+	},
 	MANTA: {
 		name: 'MANTA',
 		symbol: 'MANTA',
